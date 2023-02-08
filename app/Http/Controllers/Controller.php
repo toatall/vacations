@@ -19,7 +19,7 @@ class Controller extends BaseController
     public function dashboard(Request $request) 
     {        
         $year = $request->session()->get('year', date('Y'));
-        $model = new PeriodsSoap('http://86000-app012:8055/WSDLServices.nsf/vacation?WSDL', [], PeriodsSoap::class . $year);        
+        $model = new PeriodsSoap(getenv('SOAP_SERVICE_URL'), [], PeriodsSoap::class . $year);        
         return view('dashboard',
             array_merge($model->getPeriods($year)->getStatistics($year), [
                 'year' => $year,
@@ -32,7 +32,7 @@ class Controller extends BaseController
     public function schedule(Request $request)
     {
         $year = $request->session()->get('year', date('Y'));
-        $model = new PeriodsSoap('http://86000-app012:8055/WSDLServices.nsf/vacation?WSDL', [], PeriodsSoap::class . $year);
+        $model = new PeriodsSoap(getenv('SOAP_SERVICE_URL'), [], PeriodsSoap::class . $year);
         
         return view('schedule', [
             'data' => $model->getPeriods($year)->getDataAsArray(),
@@ -56,7 +56,7 @@ class Controller extends BaseController
 
     protected function getYears()
     {
-        $model = new SoapModel('http://86000-app012:8055/WSDLServices.nsf/vacation?WSDL');
+        $model = new SoapModel(getenv('SOAP_SERVICE_URL'));
         $data = $model->Years()->getDataAsArray();
         return $data['item'] ?? $data;
     }
