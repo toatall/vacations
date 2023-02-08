@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -75,8 +74,7 @@ class User extends Authenticatable
             $model->email = $ldapData->getAttribute('userPrincipalName')[0] ?? null;
             $model->ad_fio = $ldapData->getAttribute('cn')[0] ?? null;
             $model->ad_post = $ldapData->getAttribute('title')[0] ?? null;
-            $model->ad_department = $ldapData->getAttribute('department')[0] ?? null;
-            // $model->ad_memberof = implode('#', (array)$ldapData->getAttribute('memberOf')) ?? null;
+            $model->ad_department = $ldapData->getAttribute('department')[0] ?? null;           
             $model->ad_memberof = implode(', ', $members) ?? null;
             $model->ad_mail = $ldapData->getAttribute('mail')[0] ?? null;
             $model->ad_room = $ldapData->getAttribute('physicalDeliveryOfficeName')[0] ?? null;

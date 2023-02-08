@@ -26,7 +26,7 @@ class PeriodsSoap extends SoapModel
     public function __construct($soapUrl, $soapOptions = [], $cacheName=null)
     {
         $soapUrl = $soapUrl ?? env('SOAP.URL.PERIODS');
-        $this->colors = ['text-purple-400', 'text-blue-400', 'text-pink-400', 'text-yellow-400', 'text-gray-400', 'text-red-400'];
+        $this->colors = ['bg-purple-400', 'bg-blue-400', 'bg-pink-400', 'bg-yellow-400', 'bg-gray-400', 'bg-red-400'];
         parent::__construct($soapUrl, $soapOptions, $cacheName);
     }
 
@@ -39,6 +39,9 @@ class PeriodsSoap extends SoapModel
         return $this->convert($data['item'] ?? $data);
     }
 
+    /**
+     * @return string
+     */
     public function dateFormat()
     {
         return 'd.m.Y';
@@ -131,6 +134,10 @@ class PeriodsSoap extends SoapModel
         return $this->typesVacation;
     }
 
+    /**
+     * @param string $year
+     * @return array
+     */
     public function getStatistics($year)
     {
         // всего сотрудников       
@@ -148,7 +155,7 @@ class PeriodsSoap extends SoapModel
         $data = $this->getDataAsArray();
         $data = $data['item'] ?? $data;
 
-        $dtNow = new \DateTimeImmutable(date('d.m.Y'));
+        $dtNow = new \DateTimeImmutable(date($this->dateFormat()));
         $dtWeekStart = $dtNow->add(new \DateInterval('P1D'));
         $dtWeekEnd = $dtNow->add(new \DateInterval('P8D'));
 
@@ -170,7 +177,7 @@ class PeriodsSoap extends SoapModel
                     $dateStart = $period['dateStart'];
                     $dateEnd = $period['dateEnd'];
                     while ($dateStart <= $dateEnd) {
-                        $dStr = $dateStart->format('d.m.Y');
+                        $dStr = $dateStart->format($this->dateFormat());
                         
                         if (isset($countVacations[$dStr])) {
                             $countVacations[$dStr]++;
@@ -211,8 +218,8 @@ class PeriodsSoap extends SoapModel
                         $newItem = $period;
                         $newItem['fio'] = $fio;
                         $newItem['department'] = $depName;
-                        $newItem['dateStartText'] = $period['dateStart']->format('d.m.Y');
-                        $newItem['dateEndText'] = $period['dateEnd']->format('d.m.Y');
+                        $newItem['dateStartText'] = $period['dateStart']->format($this->dateFormat());
+                        $newItem['dateEndText'] = $period['dateEnd']->format($this->dateFormat());
                         $newItem['countDays'] = (int) (($period['dateEnd']->diff($period['dateStart'])->d) + 1);
                         $newItem['countDaysNow'] = (int) (($dtNow->diff($period['dateStart'])->d) + 1);
                         $employeesOnVacation[] = $newItem;                    
@@ -223,8 +230,8 @@ class PeriodsSoap extends SoapModel
                         $newItem = $period;
                         $newItem['fio'] = $fio;
                         $newItem['department'] = $depName;
-                        $newItem['dateStartText'] = $period['dateStart']->format('d.m.Y');
-                        $newItem['dateEndText'] = $period['dateEnd']->format('d.m.Y');
+                        $newItem['dateStartText'] = $period['dateStart']->format($this->dateFormat());
+                        $newItem['dateEndText'] = $period['dateEnd']->format($this->dateFormat());
                         $newItem['countDays'] = (int) (($period['dateEnd']->diff($period['dateStart'])->d) + 1);
                         $newItem['countDaysNow'] = (int) (($dtNow->diff($period['dateStart'])->d) + 1);
                         $employeesSoonVacation[] = $newItem;                    
@@ -240,7 +247,7 @@ class PeriodsSoap extends SoapModel
         $dateStart = new \DateTimeImmutable("01.01.$year");
         $dateEnd = new \DateTimeImmutable("31.12.$year");
         while ($dateStart <= $dateEnd) {
-            $dStr = $dateStart->format('d.m.Y');
+            $dStr = $dateStart->format($this->dateFormat());
             $countVacationsByDate[$dStr] = $countVacations[$dStr] ?? 0;
             $dateStart = $dateStart->add(new DateInterval('P1D'));
         }
@@ -253,15 +260,13 @@ class PeriodsSoap extends SoapModel
             }
             return $val;        
         }, array_keys($countVacationsByDate));
-                
-        
+                        
         return [
             'emplCount' => count($employees),
             'emplOnVacation' => $employeesOnVacation,       
-            'employeesSoonVacation' => $employeesSoonVacation,     
-            // 'countVacationsByDate' => json_encode($countVacationsByDate),
+            'employeesSoonVacation' => $employeesSoonVacation,                
             'countVacationsByDateDatas' => json_encode(array_values($countVacationsByDate)),
-            'countVacationsByDateLabels' => json_encode($countVacationsByDateLabels), //json_encode(array_keys($countVacationsByDate)),
+            'countVacationsByDateLabels' => json_encode($countVacationsByDateLabels), 
             'year' => $year,
         ];
 

@@ -82,10 +82,13 @@
                                                 $bgIndex = $count ? (round(($count / count($departmentData)) * 100, -1)) : false;
                                             ?>
                                             <td class="text-gray-600 z-5 border p-1 @if($bgIndex !== false) bg-green-500/{{ $bgIndex }} @else @if($day['date']->format('N') >= 6) bg-red-50 @else bg-yellow-50 @endif @endif font-mono text-center font-bold">                                             
-                                                @if($count > 0) {{ $count }} 
-                                                <div class="w-full bg-gray-200 h-1 rounded-sm">
-                                                    <div class="bg-yellow-800 h-1 rounded-sm" style="width: <?= round(($count / count($departmentData)) * 100) ?>%;"></div>
-                                                </div>
+                                                @if($count > 0)
+                                                    <span class="text-xs inline-block py-1 px-2 leading-none text-center font-bold text-white rounded bg-green-500"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-html="true" title="<strong>{{ round(($count / count($departmentData)) * 100) }}%</strong> сотрудников в отпуске<hr /><i class='far fa-calendar'></i> {{ $day['date']->format('d.m.Y') }}<br />{{ __($day['date']->format('l')) }}"
+                                                    >
+                                                        {{ $count }} 
+                                                    </span><br /><br />                                                
                                                 @endif
                                             </td>
                                         @endforeach
@@ -98,30 +101,36 @@
                                     <td class="bg-white z-10 border-b border-slate-100 pl-20 py-3 text-left text-base text-gray-600 sticky left-0">
                                         <i class="fa-regular fa-circle-user"></i> {{ $fio }}
                                     </td>   
-                                    
+                                    <?php $lastDay = 0; ?>
                                     @foreach($calendar as $month)             
                                         @foreach($month['daysData'] as $day)
                                             <?php
-                                                $tooltipTitle = '';
+                                                $tooltipTitle = '';                                                
                                                 $bgColor = 'text-yellow-50/[.7]';
                                                 foreach($empl as $period) {
                                                     if($day['date'] >= $period['dateStart']  && $day['date'] <= $period['dateEnd']
                                                         && isset($typesVacation[$period['type']])) {
                                                         $bgColor = $typesVacation[$period['type']];
                                                         $tooltipTitle = $period['type'] 
-                                                            . '<br /><b>' . $day['date']->format('d.m.Y') . '</b>';
+                                                            . '<br /><b>' . $day['date']->format('d.m.Y') . '</b>';                                                        
                                                     }
+                                                }
+
+                                                if ($tooltipTitle) {
+                                                    $lastDay++;
+                                                }
+                                                else {
+                                                    $lastDay = 0;
                                                 }
                                             ?>
 
-                                    <td class="text-gray-600 z-5 border p-0 text-center  @if($day['date']->format('N') >= 6) bg-red-50/[.7] @else bg-yellow-50/[.7] @endif">
-                                        @if($tooltipTitle)
-                                            <i class="fas fa-umbrella-beach {{ $bgColor }}"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-html="true" title="{{ $tooltipTitle }}"
-                                            ></i>
-                                        @endif
-                                    </td>
+                                            <td class="text-gray-600 z-5 border p-0 text-center @if($day['date']->format('N') >= 6) bg-red-50/[.7] @else bg-yellow-50/[.7] @endif">
+                                                @if($tooltipTitle)
+                                                    <span class="text-xs inline-block py-1 px-2 leading-none text-center font-bold text-white rounded {{ $bgColor }}" 
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-html="true" title="{{ $tooltipTitle }}<hr />{{ __($day['date']->format('l')) }}">{{ $lastDay }}</span>                                                    
+                                                @endif
+                                            </td>
                                         @endforeach
                                     @endforeach    
                                 </tr>
